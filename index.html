@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07152f">
+  <title>YATI AI</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:system-ui,Arial,sans-serif;color:#eef5ff;
+      background:radial-gradient(circle at 50% 15%,#173d78 0,#0b1c3d 38%,#050b19 100%);
+      display:flex;justify-content:center;align-items:center;padding:20px}
+    main{width:min(100%,430px);text-align:center}
+    .logo{width:104px;height:104px;border:2px solid #63c9ff;border-radius:30px;margin:12px auto 18px;
+      display:grid;place-items:center;font-size:43px;font-weight:800;color:#8ee0ff;
+      box-shadow:0 0 28px #168bdb88,inset 0 0 22px #168bdb55;background:#0b2348}
+    h1{letter-spacing:5px;margin:0;font-size:32px}
+    .sub{color:#a9c8ec;margin:7px 0 26px}
+    .panel{background:#0d1b35cc;border:1px solid #284a78;border-radius:22px;padding:20px;
+      box-shadow:0 15px 40px #0005}
+    .status{color:#9ec7ed;font-size:14px;min-height:22px;margin-bottom:14px}
+    button,select{font:inherit;border-radius:14px;border:1px solid #3975ad;padding:12px 15px;
+      color:#f4f9ff;background:#102c52}
+    button{cursor:pointer}
+    .talk{width:100%;padding:16px;font-weight:700;background:linear-gradient(90deg,#087fbd,#315fe0);
+      border:0;font-size:17px;margin:12px 0}
+    .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+    #reply{min-height:70px;text-align:left;background:#07142a;border-radius:14px;padding:14px;
+      color:#d6eaff;line-height:1.5;margin-top:14px;white-space:pre-wrap}
+    .note{font-size:12px;color:#8da9ca;line-height:1.5;margin:18px 4px 0}
+  </style>
+</head>
+<body>
+<main>
+  <div class="logo" aria-label="YATI logo">Y</div>
+  <h1>YATI AI</h1>
+  <div class="sub">Your personal assistant · आपका निजी सहायक</div>
+  <section class="panel">
+    <div class="status" id="status">Ready when you are · मैं तैयार हूँ</div>
+    <div class="row">
+      <label for="language">Voice language:</label>
+      <select id="language">
+        <option value="en-IN">English (India)</option>
+        <option value="hi-IN">हिन्दी</option>
+      </select>
+    </div>
+    <button class="talk" id="talk">🎙 Tap to speak / बोलने के लिए दबाएँ</button>
+    <div id="reply">Hello! I am YATI. Your first version is ready. AI connection will be added in a later safe step.
+नमस्ते! मैं YATI हूँ।</div>
+    <div class="row" style="margin-top:14px">
+      <button id="say">🔊 Read reply</button>
+      <button id="clear">Clear</button>
+    </div>
+  </section>
+  <p class="note">First preview version. Voice support depends on your Android browser. Do not enter passwords, API keys, or private information here.</p>
+</main>
+<script>
+const statusEl=document.getElementById('status');
+const replyEl=document.getElementById('reply');
+const language=document.getElementById('language');
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null;
+document.getElementById('talk').addEventListener('click',()=>{
+  if(!SpeechRecognition){statusEl.textContent='Voice recognition is not supported in this browser. Try Chrome on Android.';return;}
+  recognition=new SpeechRecognition();
+  recognition.lang=language.value; recognition.interimResults=false; recognition.maxAlternatives=1;
+  statusEl.textContent='Listening… / सुन रहा हूँ…';
+  recognition.onresult=e=>{
+    const heard=e.results[0][0].transcript;
+    replyEl.textContent='You said / आपने कहा: '+heard+'\n\nYATI heard you. The live AI answer connection is the next setup step.';
+    statusEl.textContent='Voice captured · आवाज़ मिल गई';
+  };
+  recognition.onerror=()=>statusEl.textContent='Could not hear clearly. Please try again.';
+  recognition.onend=()=>{if(statusEl.textContent.startsWith('Listening'))statusEl.textContent='Ready · तैयार';};
+  recognition.start();
+});
+document.getElementById('say').addEventListener('click',()=>{
+  if(!('speechSynthesis' in window)){statusEl.textContent='Text-to-speech is unavailable in this browser.';return;}
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(replyEl.textContent);
+  u.lang=language.value; speechSynthesis.speak(u);
+});
+document.getElementById('clear').addEventListener('click',()=>{
+  replyEl.textContent='Hello! I am YATI. Your first version is ready.\nनमस्ते! मैं YATI हूँ।';
+  statusEl.textContent='Ready · तैयार';
+});
+</script>
+</body>
+</html>
